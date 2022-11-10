@@ -8,7 +8,7 @@
 
 
 extern pathnode_t frontier[MAP_HEIGHT*MAP_WIDTH+2];
-extern unsigned int frontierLength;
+extern int frontierLength;
 extern bool visited[MAP_HEIGHT][MAP_WIDTH];
 
 extern bool G_CheckDynamicSpriteMap(int level, int y, int x);

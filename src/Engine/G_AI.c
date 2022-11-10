@@ -8,7 +8,7 @@
 
 // Dynamic AI list
 dynamicSprite_t* allDynamicSprites[OBJECTARRAY_DEFAULT_SIZE_HIGH];
-unsigned int allDynamicSpritesLength = 0;
+int allDynamicSpritesLength = 0;
 
 // Initializes the dynamic sprites
 // Switch on the spriteID to be able to configure parameters for each entity, could be done in a file to avoid having to recompile to change stuff like speed
@@ -158,7 +158,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             break;
 
         default:
-            printf("AI with ID %d was not initalized. Setting it with base stats.\n");
+            SDL_Log("AI with ID %d was not initalized. Setting it with base stats.\n", spriteID);
             cur->isBoss = false;
             cur->BehaviourUpdate = G_AI_BehaviourMeeleEnemy;
             cur->attributes.maxHealth = 100.0f;
@@ -292,9 +292,15 @@ void G_AIPlayAnimationLoop(dynamicSprite_t* cur, objectanimationsID_e animID)
             cur->animSpeed = ANIMATION_SPEED_DIVIDER;
             break;
 
+        case ANIM_ATTACK1:
+            break;
+
         case ANIM_DIE:
             cur->state = DS_STATE_DEAD;
             cur->animSpeed = ANIMATION_SPEED_DIVIDER;
+            break;
+
+        case ANIM_CAST_SPELL:
             break;
 
         case ANIM_SPECIAL1:

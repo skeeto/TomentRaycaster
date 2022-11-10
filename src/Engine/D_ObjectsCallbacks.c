@@ -12,7 +12,7 @@ void D_CallbackPickup(char* data)
 {
     if(strcmp(data, "WEAPON_AXE") == 0)
     {
-        printf("Adding Weapon: Axe \n");
+        SDL_Log("Adding Weapon: Axe \n");
 
         alertMessage_t* mess = (alertMessage_t*)malloc(sizeof(alertMessage_t));
         R_QueueAlertMessage(mess, ALERT_MESSAGE_DEF_X, ALERT_MESSAGE_DEF_Y, "You picked up an Axe", 2.0f, 1.0f);
@@ -22,7 +22,7 @@ void D_CallbackPickup(char* data)
     }
     else if(strcmp(data, "WEAPON_GREATSWORD") == 0)
     {
-        printf("Adding Weapon: Greatsword \n");
+        SDL_Log("Adding Weapon: Greatsword \n");
 
         alertMessage_t* mess = (alertMessage_t*)malloc(sizeof(alertMessage_t));
         R_QueueAlertMessage(mess, ALERT_MESSAGE_DEF_X-50, ALERT_MESSAGE_DEF_Y, "You picked up a  Greatsword", 2.0f, 1.0f);
@@ -32,7 +32,7 @@ void D_CallbackPickup(char* data)
     }
     else if(strcmp(data, "PICKUP_HEALTH") == 0)
     {
-        printf("Adding player's health\n");
+        SDL_Log("Adding player's health\n");
 
         alertMessage_t* mess = (alertMessage_t*)malloc(sizeof(alertMessage_t));
         R_QueueAlertMessage(mess, ALERT_MESSAGE_DEF_X-50, ALERT_MESSAGE_DEF_Y, "You drink an Health  Potion", 2.0f, 1.0f);
@@ -41,7 +41,7 @@ void D_CallbackPickup(char* data)
     }
     else if(strcmp(data, "PICKUP_MANA") == 0)
     {
-        printf("Adding player's mana\n");
+        SDL_Log("Adding player's mana\n");
 
         alertMessage_t* mess = (alertMessage_t*)malloc(sizeof(alertMessage_t));
         R_QueueAlertMessage(mess, ALERT_MESSAGE_DEF_X-50, ALERT_MESSAGE_DEF_Y, "You drink a  Mana  Potion", 2.0f, 1.0f);
@@ -49,7 +49,7 @@ void D_CallbackPickup(char* data)
     }
     else if(strcmp(data, "TOME_FIREBALL") == 0)
     {
-        printf("Adding Spell: Fireball\n");
+        SDL_Log("Adding Spell: Fireball\n");
 
         alertMessage_t* mess = (alertMessage_t*)malloc(sizeof(alertMessage_t));
         R_QueueAlertMessage(mess, ALERT_MESSAGE_DEF_X-50, ALERT_MESSAGE_DEF_Y, "You learn:  Fireball!", 2.0f, 1.0f);
@@ -58,7 +58,7 @@ void D_CallbackPickup(char* data)
     }
     else if(strcmp(data, "TOME_ICEDART") == 0)
     {
-        printf("Adding Spell: Ice Dart\n");
+        SDL_Log("Adding Spell: Ice Dart\n");
 
         alertMessage_t* mess = (alertMessage_t*)malloc(sizeof(alertMessage_t));
         R_QueueAlertMessage(mess, ALERT_MESSAGE_DEF_X-50, ALERT_MESSAGE_DEF_Y, "You learn:  Ice  Dart!", 2.0f, 1.0f);
@@ -69,7 +69,7 @@ void D_CallbackPickup(char* data)
 
 void D_CallbackLadder(char* data)
 {
-    printf("Climbing Ladder\n");
+    SDL_Log("Climbing Ladder\n");
     wallObject_t* wallObj = R_GetWallObjectFromMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x);
 
     // Check if he player is facing a ladder
@@ -134,8 +134,7 @@ void D_CallbackLadder(char* data)
 
 void D_CallbackLadderDown(char* data)
 {
-    printf("Climbing Ladder Down\n");
-    wallObject_t* wallObj = R_GetWallObjectFromMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x);
+    SDL_Log("Climbing Ladder Down\n");
 
     // Check if he player is facing a ladder
 
@@ -185,10 +184,10 @@ void D_CallbackLadderDown(char* data)
 
 void D_CallbackUseAltar(char* data)
 {
-    printf("Used Altar\n");
+    SDL_Log("Used Altar\n");
     if(strcmp(data, "HEALTH") == 0)
     {
-        printf("Praying to an Health Altar...\n");
+        SDL_Log("Praying to an Health Altar...\n");
         player.attributes.maxHealth += 100;
         player.attributes.curHealth = player.attributes.maxHealth;
 
@@ -197,7 +196,7 @@ void D_CallbackUseAltar(char* data)
     }
     else if (strcmp(data, "MANA") == 0)
     {
-        printf("Praying to a Mana Altar...\n");
+        SDL_Log("Praying to a Mana Altar...\n");
         player.attributes.maxMana += 100;
         player.attributes.curMana = player.attributes.maxMana;
 

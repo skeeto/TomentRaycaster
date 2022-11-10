@@ -8,7 +8,6 @@ playerinput_t playerinput;
 void I_HandleInputGame(void)
 {
     const Uint8* keyboard_state = SDL_GetKeyboardState(NULL);
-    const Uint32 mouse_state = SDL_GetMouseState(NULL, NULL);
 
     SDL_Event e;
     
@@ -36,9 +35,6 @@ void I_HandleInputGame(void)
 
 void I_HandleInputMenu(void)
 {
-    const Uint8* keyboard_state = SDL_GetKeyboardState(NULL);
-    const Uint32 mouse_state = SDL_GetMouseState(NULL, NULL);
-
     SDL_Event e;
     
     while(SDL_PollEvent(&e))

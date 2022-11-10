@@ -69,7 +69,7 @@ extern int visibleSpritesLength;
 
 // Found thin walls to draw
 extern walldata_t currentThinWalls[MAX_PROJECTION_PLANE_WIDTH * MAX_THIN_WALL_TRANSPARENCY_RECURSION];
-extern unsigned visibleThinWallsLength;
+extern int visibleThinWallsLength;
 
 // Alert message
 #define ALERT_MESSAGE_DEF_X 360

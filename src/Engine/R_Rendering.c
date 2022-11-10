@@ -31,7 +31,7 @@ int visibleSpritesLength;
 // Thin wall Transparency
 // =========================================
 walldata_t currentThinWalls[MAX_PROJECTION_PLANE_WIDTH * MAX_THIN_WALL_TRANSPARENCY_RECURSION];
-unsigned visibleThinWallsLength;
+int visibleThinWallsLength;
 
 // Drawables
 drawabledata_t allDrawables[MAX_DRAWABLES];
@@ -154,6 +154,9 @@ void R_ComposeFrame(void)
 {
     switch(application.gamestate)
     {
+        case dev:
+            break;
+
         case GSTATE_MENU:
             G_RenderCurrentMenuBackground();
             G_RenderCurrentMenu();
@@ -307,10 +310,6 @@ void I_Ray(int level, int playersLevel)
     {
         bool occlusionEnabled = (level == playersLevel) ? true : false; // for now player can only be on level 0
 
-        // Variables set by Raycast functions to draw floor
-        float outHeight;
-        float outEnd;
-
         if(occlusionEnabled)
             R_RaycastPlayersLevel(level, x, rayAngle);
         else
@@ -407,8 +406,6 @@ void R_RaycastPlayersLevel(int level, int x, float _rayAngle)
     // Final grid point
     int fcurGridX;
     int fcurGridY;
-    
-    vector2_t wallPoint;
 
     // HORIZONTAL CHECK
     if(rayAngle != 0.0f && rayAngle != M_PI) 
@@ -416,7 +413,7 @@ void R_RaycastPlayersLevel(int level, int x, float _rayAngle)
         // Get first intersection
         if(rayAngle < M_PI)
         {
-            //printf("FACING DOWN\n");
+            //SDL_Log("FACING DOWN\n");
             A.y = floorf((player.centeredPos.y) / TILE_SIZE) * TILE_SIZE + TILE_SIZE;
             Ya = TILE_SIZE;
             Xa = TILE_SIZE / tan(rayAngle);
@@ -424,7 +421,7 @@ void R_RaycastPlayersLevel(int level, int x, float _rayAngle)
         }
         else
         {
-            //printf("FACING UP\n");
+            //SDL_Log("FACING UP\n");
             A.y = floorf((player.centeredPos.y) / TILE_SIZE) * TILE_SIZE;
             Ya = -TILE_SIZE;
             Xa = TILE_SIZE / tan(rayAngle) *-1;
@@ -562,7 +559,7 @@ void R_RaycastPlayersLevel(int level, int x, float _rayAngle)
         // Get first intersection
         if(rayAngle < M_PI / 2 || rayAngle > (3*M_PI) / 2)
         {
-            //printf("FACING RIGHT\n");
+            //SDL_Log("FACING RIGHT\n");
             B.x = floorf((player.centeredPos.x)/ TILE_SIZE) * TILE_SIZE+TILE_SIZE;
             Ya = TILE_SIZE * tan(rayAngle);
             Xa = TILE_SIZE;
@@ -570,7 +567,7 @@ void R_RaycastPlayersLevel(int level, int x, float _rayAngle)
         }
         else
         {
-            //printf("FACING LEFT\n");
+            //SDL_Log("FACING LEFT\n");
             B.x = floorf((player.centeredPos.x) / TILE_SIZE) * TILE_SIZE;
             Ya = TILE_SIZE * tan(rayAngle) *-1;
             Xa = -TILE_SIZE;
@@ -702,9 +699,6 @@ void R_RaycastPlayersLevel(int level, int x, float _rayAngle)
             correctDistance = hDistance;
             correctObjectHit = hobjectIDHit;
 
-            wallPoint.x = hcurx;
-            wallPoint.y = hcury;
-
             fcurGridX = hcurGridX;
             fcurGridY = hcurGridY;
 
@@ -716,9 +710,6 @@ void R_RaycastPlayersLevel(int level, int x, float _rayAngle)
             horizontal = false;
             correctDistance = vDistance;
             correctObjectHit = vobjectIDHit;
-
-            wallPoint.x = vcurx;
-            wallPoint.y = vcury;
 
             fcurGridX = vcurGridX;
             fcurGridY = vcurGridY;
@@ -880,10 +871,9 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle)
     vector2_t wallPoint;
 
     // For NonOccluded raycast we should keep raycasting until the end or the map or the defined 
-    int maxDrawDistance = 24;
     bool mapEndedOrMaxDistanceReached = false;
     walldata_t toDraw[MAX_PROJECTION_PLANE_WIDTH * MAX_N_LEVELS];
-    unsigned int toDrawLength = 0;
+    int toDrawLength = 0;
     
     // HORIZONTAL CHECK
     if(rayAngle != 0.0f && rayAngle != M_PI) 
@@ -891,7 +881,7 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle)
         // Get first intersection
         if(rayAngle < M_PI)
         {
-            //printf("FACING DOWN\n");
+            //SDL_Log("FACING DOWN\n");
             A.y = floorf((player.centeredPos.y) / TILE_SIZE) * TILE_SIZE + TILE_SIZE;
             horYa = TILE_SIZE;
             horXa = TILE_SIZE / tan(rayAngle);
@@ -899,7 +889,7 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle)
         }
         else
         {
-            //printf("FACING UP\n");
+            //SDL_Log("FACING UP\n");
             A.y = floorf((player.centeredPos.y) / TILE_SIZE) * TILE_SIZE;
             horYa = -TILE_SIZE;
             horXa = TILE_SIZE / tan(rayAngle) *-1;
@@ -919,7 +909,7 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle)
         // Get first intersection
         if(rayAngle < M_PI / 2 || rayAngle > (3*M_PI) / 2)
         {
-            //printf("FACING RIGHT\n");
+            //SDL_Log("FACING RIGHT\n");
             B.x = floorf((player.centeredPos.x)/ TILE_SIZE) * TILE_SIZE+TILE_SIZE;
             verYa = TILE_SIZE * tan(rayAngle);
             verXa = TILE_SIZE;
@@ -927,7 +917,7 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle)
         }
         else
         {
-            //printf("FACING LEFT\n");
+            //SDL_Log("FACING LEFT\n");
             B.x = floorf((player.centeredPos.x) / TILE_SIZE) * TILE_SIZE;
             verYa = TILE_SIZE * tan(rayAngle) *-1;
             verXa = -TILE_SIZE;
@@ -1321,7 +1311,7 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle)
             if(leveledEnd > PROJECTION_PLANE_HEIGHT)
                 leveledEnd = PROJECTION_PLANE_HEIGHT;
 
-            //printf("LEVEL %1d - Start %6f - End %6f\n", level, start-1 - floor(wallHeight)*level, end - floor(wallHeight)*level+1);
+            //SDL_Log("LEVEL %1d - Start %6f - End %6f\n", level, start-1 - floor(wallHeight)*level, end - floor(wallHeight)*level+1);
 
             // Calculate lighting intensity
             float wallLighting = (PLAYER_POINT_LIGHT_INTENSITY + currentMap.wallLight)  / finalDistance;
@@ -1643,7 +1633,6 @@ void R_FloorCasting(int end, float rayAngle, int x, float wallHeight)
         int curGridY = floor(floory / TILE_SIZE);
 
         int floorObjectID = -1;
-        int ceilingObjectID = -1;
 
         // If the ray is in a grid that is inside the map
         if(curGridX >= 0 && curGridY >= 0 && curGridX < MAP_WIDTH && curGridY < MAP_HEIGHT)
@@ -1689,7 +1678,6 @@ void R_CeilingCasting(int level, float start, float rayAngle, int x, float wallH
         float floorLighting = (PLAYER_POINT_LIGHT_INTENSITY + currentMap.floorLight) / d;
         floorLighting = SDL_clamp(floorLighting, 0, 1.0f);
 
-        int floorObjectID = -1;
         int ceilingObjectID = -1;
 
         // If the ray is in a grid that is inside the map
@@ -1887,7 +1875,6 @@ void R_DrawSprite(sprite_t* sprite)
         yTemp = playerAngle + (PLAYER_FOV / 2) - angle - 360;
 
     float spriteX = yTemp * (PROJECTION_PLANE_WIDTH / PLAYER_FOV_F);
-    float spriteY = PROJECTION_PLANE_HEIGHT / 2;
     
     // Calculate distance and fix fisheye
     float fixedAngle = ((angle*RADIAN) - player.angle);
@@ -1955,7 +1942,6 @@ void R_DrawDynamicSprite(dynamicSprite_t* sprite)
         yTemp = playerAngle + (PLAYER_FOV / 2) - angle - 360;
 
     float spriteX = yTemp * (PROJECTION_PLANE_WIDTH / PLAYER_FOV_F);
-    float spriteY = PROJECTION_PLANE_HEIGHT / 2;
     
     // Calculate distance and fix fisheye
     float fixedAngle = ((angle*RADIAN) - player.angle);
@@ -2027,7 +2013,7 @@ void R_DrawDrawables(void)
         cur = cur->next;
     }
 
-    //printf("DRAWN %d\n", counter);
+    //SDL_Log("DRAWN %d\n", counter);
 }
 
 
@@ -2047,7 +2033,7 @@ wallObject_t* R_GetWallObjectFromMap(int level, int y, int x)
                 return &currentMap.level2[y][x];
 
             default:
-                //printf("WARNING! Level get was out of max/min level size\n");
+                //SDL_Log("WARNING! Level get was out of max/min level size\n");
                 return 0;
         }
     }
@@ -2073,7 +2059,7 @@ int R_GetValueFromSpritesMap(int level, int y, int x)
                 return currentMap.spritesMapLevel2[y][x];
 
             default:
-                //printf("WARNING! Level get was out of max/min level size\n");
+                //SDL_Log("WARNING! Level get was out of max/min level size\n");
                 return 0;
         }
     }
@@ -2102,7 +2088,7 @@ void R_SetValueFromSpritesMap(int level, int y, int x, int value)
                 break;
 
             default:
-                //printf("WARNING! Level get was out of max/min level size\n");
+                //SDL_Log("WARNING! Level get was out of max/min level size\n");
                break;
         }
     }
@@ -2127,7 +2113,7 @@ void R_SetValueFromCollisionMap(int level, int y, int x, int value)
                 break;
 
             default:
-                //printf("WARNING! Level get was out of max/min level size\n");
+                //SDL_Log("WARNING! Level get was out of max/min level size\n");
                break;
         }
     }

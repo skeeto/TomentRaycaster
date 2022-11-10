@@ -388,7 +388,7 @@ void G_UpdateProjectiles(void)
             float playerDist = sqrt(cur->this.base.pSpacePos.x*cur->this.base.pSpacePos.x + cur->this.base.pSpacePos.y*cur->this.base.pSpacePos.y);
             if(!cur->this.isOfPlayer && cur->this.base.level == player.level && cur->this.base.gridPos.x == player.gridPosition.x && cur->this.base.gridPos.y == player.gridPosition.y && playerDist < TILE_SIZE-12)
             {
-                printf("%f\n", playerDist);
+                SDL_Log("%f\n", playerDist);
                 float damage = 0.0f;
 
                 // Damage sprite
@@ -501,7 +501,7 @@ void G_SpawnProjectile(int id, float angle, int level, float posx, float posy, f
     newNode->this.curAnim = NULL;
     newNode->this.curAnimLength = 0;
     newNode->this.animPlay = true;
-    newNode->this.state = ANIM_IDLE;
+    newNode->this.state = DS_STATE_NULL;
     newNode->this.animTimer = U_TimerCreateNew();
     newNode->this.isBeingDestroyed = false;
 

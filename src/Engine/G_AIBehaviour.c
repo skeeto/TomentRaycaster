@@ -422,6 +422,9 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
 {
     switch(cur->state)
     {
+        case DS_STATE_NULL:
+            break;
+
         case DS_STATE_IDLE:
         case DS_STATE_MOVING:
         case DS_STATE_CASTING:

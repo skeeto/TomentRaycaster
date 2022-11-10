@@ -9,7 +9,6 @@ static void I_LoadMapFromFile(int map[MAP_HEIGHT][MAP_WIDTH], FILE* fp);
 static void I_LoadIntFromFile(FILE* fp, int* toLoad);
 static void I_LoadBoolFromFile(FILE* fp, bool* toLoad);
 static void I_LoadFloatFromFile(FILE* fp, float* toLoad);
-static void I_ReadStringFromFile(FILE* fp, char toWrite[MAX_STRLEN]);
 
 // -------------------------------
 // Loads the map from the file named mapID
@@ -23,14 +22,14 @@ void M_LoadMapAsCurrent(char* mapID)
       strcat(filepath, mapID);
       strcat(filepath, ".tmap");
 
-      printf("Loading map... %s\n", filepath);
+      SDL_Log("Loading map... %s\n", filepath);
 
       // Open file
       fp = fopen(filepath, "r");
 
       if(fp == NULL)
       {
-            printf("Map %s is not present in the Data folder. Aborting. \n");
+            SDL_Log("Map %s is not present in the Data folder. Aborting. \n", mapID);
             return;
       }
 
@@ -129,7 +128,7 @@ void M_LoadMapAsCurrent(char* mapID)
       // Load the Collision Map
       M_LoadCollisionMaps();
 
-      printf("Map loaded successfully! ID: %s\n", currentMap.id);
+      SDL_Log("Map loaded successfully! ID: %s\n", currentMap.id);
 }
 
 // -------------------------------
@@ -372,7 +371,6 @@ static void I_LoadWallMapFromFile(wallObject_t map[MAP_HEIGHT][MAP_WIDTH], FILE*
       char curLine[MAX_STRL_R];   // Current line we're reading
       char* str;                  // Used to strchr
       int indx;                   // Index of the =
-      int i;                      // Index for writing in new string
 
       fgets(curLine, MAX_STRL_R, fp); // Layout =
       fgets(curLine, MAX_STRL_R, fp); // [ start of map
@@ -489,7 +487,7 @@ static void I_LoadWallMapFromFile(wallObject_t map[MAP_HEIGHT][MAP_WIDTH], FILE*
                         indx++;
                         row++;
                   }
-                  //printf("%c!\n", curLine[indx]);
+                  //SDL_Log("%c!\n", curLine[indx]);
             }
 
             // Row end, check if there's a next row or if it is finished
@@ -510,7 +508,7 @@ static void I_LoadWallMapFromFile(wallObject_t map[MAP_HEIGHT][MAP_WIDTH], FILE*
             }
       }
 
-      printf("%s\n", map[0][0].data);
+      SDL_Log("%s\n", map[0][0].data);
 }
 
 static void I_LoadMapFromFile(int map[MAP_HEIGHT][MAP_WIDTH], FILE* fp)
@@ -519,7 +517,6 @@ static void I_LoadMapFromFile(int map[MAP_HEIGHT][MAP_WIDTH], FILE* fp)
       char curLine[MAX_STRL_R];   // Current line we're reading
       char* str;                  // Used to strchr
       int indx;                   // Index of the =
-      int i;                      // Index for writing in new string
 
       fgets(curLine, MAX_STRLEN, fp); // Layout =
       fgets(curLine, MAX_STRLEN, fp); // [ start of map
@@ -556,7 +553,7 @@ static void I_LoadMapFromFile(int map[MAP_HEIGHT][MAP_WIDTH], FILE* fp)
                         row++;
                   }
 
-                  //printf("%c!\n", curLine[indx]);
+                  //SDL_Log("%c!\n", curLine[indx]);
             }
 
             // Row end, check if there's a next row or if it is finished
@@ -678,32 +675,4 @@ static void I_LoadFloatFromFile(FILE* fp, float* toLoad)
 
       // Convert to float
       *toLoad = atof(tempStr);
-}
-
-static void I_ReadStringFromFile(FILE* fp, char toWrite[MAX_STRLEN])
-{
-      char curLine[MAX_STRL_R];   // Current line we're reading
-      char* str;                  // Used to strchr
-      int indx;                   // Index of the =
-      int i;                      // Index for writing in new string
-
-      fgets(curLine, MAX_STRL_R, fp);
-
-      printf("%s\n", curLine);
-
-      // Find index for reading
-      str = strchr(curLine, '=');
-      indx = (int)(str - curLine) + 1;
-
-      // Init index for writing
-      i = 0;
-
-      // Write
-      while(curLine[indx] != ';' && curLine[indx] != '\n' && curLine[indx] != EOF)
-      {
-            toWrite[i] = curLine[indx];
-            i++;
-            indx++;
-      }
-      toWrite[i] = '\0';
 }

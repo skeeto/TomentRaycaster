@@ -116,29 +116,29 @@ typedef struct objectAnimations_s
     struct object_s* belongsTo;
     
     SDL_Surface* animIdle;
-    unsigned animIdleSheetLength;
-    unsigned animIdleActionFrame;
+    int animIdleSheetLength;
+    int animIdleActionFrame;
 
     SDL_Surface* animDie;
-    unsigned animDieSheetLength;
-    unsigned animDieActionFrame;
+    int animDieSheetLength;
+    int animDieActionFrame;
 
     SDL_Surface* animAttack;
-    unsigned animAttackSheetLength;
-    unsigned animAttackActionFrame;
+    int animAttackSheetLength;
+    int animAttackActionFrame;
 
     SDL_Surface* animCastSpell;
-    unsigned animCastSpellSheetLength;
-    unsigned animCastSpellActionFrame;
+    int animCastSpellSheetLength;
+    int animCastSpellActionFrame;
 
     // Extra Animations
     SDL_Surface* animSpecial1;
-    unsigned animSpecial1SheetLength;
-    unsigned animSpecial1ActionFrame;
+    int animSpecial1SheetLength;
+    int animSpecial1ActionFrame;
 
     SDL_Surface* animSpecial2;
-    unsigned animSpecial2SheetLength;
-    unsigned animSpecial2ActionFrame;
+    int animSpecial2SheetLength;
+    int animSpecial2ActionFrame;
 } objectanimations_t;
 
 

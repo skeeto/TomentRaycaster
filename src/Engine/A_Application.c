@@ -23,7 +23,7 @@ void A_InitApplication(void)
 {
     application.quit = false;
 
-    printf("Booting up...\n");
+    SDL_Log("Booting up...\n");
 
     SDL_Init(SDL_INIT_EVERYTHING);
 
@@ -73,6 +73,9 @@ void A_ChangeState(gamestate_e newState)
 
     switch(application.gamestate)
     {
+        case dev:
+            break;
+
         case GSTATE_MENU:
             SDL_SetRelativeMouseMode(SDL_FALSE);
             break;

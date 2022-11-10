@@ -47,7 +47,7 @@ typedef struct path_s
 {
     bool isValid;
     pathnode_t* nodes[256];
-    unsigned int nodesLength;
+    int nodesLength;
 } path_t;
 
 // -------------------------------

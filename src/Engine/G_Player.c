@@ -21,7 +21,7 @@ static void I_DetermineInFrontGrid(void);
 static void I_SetAttackCone(int id, int x, int y);
 
 static bool I_PlayerAttack(int attackType);
-static bool I_PlayerCastSpell(playerSpells_e attackType);
+static void I_PlayerCastSpell(playerSpells_e attackType);
 
 static void I_PlayerLadderMovements();
 
@@ -120,7 +120,7 @@ void G_PlayerTick(void)
         playerinput.dir.x = cos(player.angle);
         playerinput.dir.y = sin(player.angle);
 
-        //printf(" ANGLE: %f DIR: %f | %f\n", player.angle, playerinput.dir.x, playerinput.dir.y);
+        //SDL_Log(" ANGLE: %f DIR: %f | %f\n", player.angle, playerinput.dir.x, playerinput.dir.y);
 
         // Calculate dx dy
         player.deltaPos.x = (playerinput.dir.x * playerinput.input.y) * PLAYER_SPEED * deltaTime;
@@ -255,7 +255,7 @@ void G_PlayerCollisionCheck()
     //---------------------------------------------------
     
     // The circle the player has if the delta movement is applied
-    circle_t hypoteticalPlayerCircle = {player.collisionCircle.pos.x += player.deltaPos.x, player.collisionCircle.pos.y += player.deltaPos.y, player.collisionCircle.r};
+    circle_t hypoteticalPlayerCircle = {{player.collisionCircle.pos.x += player.deltaPos.x, player.collisionCircle.pos.y += player.deltaPos.y}, player.collisionCircle.r};
     for(int i = 0; i < allDynamicSpritesLength; i++)
     {
         if(allDynamicSprites[i]->base.active && allDynamicSprites[i]->base.level == player.level)
@@ -605,7 +605,7 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
 
                 if(objType == ObjT_Door)
                 {
-                    printf("Tapped a door\n");
+                    SDL_Log("Tapped a door\n");
                     
                     if(player.isFightingBoss && player.bossFighting->bossPreventOpeningDoorsWhileFighting)
                     {
@@ -624,11 +624,11 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
                 }
                 else if(objType == ObjT_Empty)
                 {
-                    printf("Tapped an empty space\n");
+                    SDL_Log("Tapped an empty space\n");
                 }
                 else if(objType == ObjT_Sprite)
                 {
-                    printf("Tapped a sprite\n");
+                    SDL_Log("Tapped a sprite\n");
                     
                     int spriteID = R_GetValueFromSpritesMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x);
                     if(tomentdatapack.sprites[spriteID]->Callback != NULL && U_GetBit(&tomentdatapack.sprites[spriteID]->flags, 3) == 0)
@@ -651,11 +651,11 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
                 }
                 else if(objType == ObjT_Wall)
                 {
-                    printf("Tapped a wall\n");
+                    SDL_Log("Tapped a wall\n");
                 }
                 else if(objType == ObjT_Trigger)
                 {
-                    printf("Tapped a trigger\n");
+                    SDL_Log("Tapped a trigger\n");
                     
                     if(player.isFightingBoss && player.bossFighting->bossPreventActivatingTriggersWhileFighting)
                     {
@@ -711,7 +711,7 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
                     G_PerformPathfindingDebug(allDynamicSprites[0]->base.level, allDynamicSprites[0]->base.gridPos, deb);
                 else
                 {
-                    printf("Tried to debug pathfinding between first dynamic sprite and player, but no dynamic sprite is present in this map... Performing Pathfinding from center of the map to the player...\n");
+                    SDL_Log("Tried to debug pathfinding between first dynamic sprite and player, but no dynamic sprite is present in this map... Performing Pathfinding from center of the map to the player...\n");
                     vector2Int_t gridpos = {floor(MAP_WIDTH / 2), floor(MAP_HEIGHT / 2)};
                     G_PerformPathfindingDebug(player.level, gridpos, deb);
                 }
@@ -782,6 +782,7 @@ int G_CheckCollisionMap(int level, int y, int x)
         case 2:
             return currentMap.collisionMapLevel2[y][x];
     }
+    abort();
 }
 
 //-------------------------------------
@@ -800,12 +801,13 @@ int G_GetDoorState(int level, int y, int x)
         case 2:
             return doorstateLevel2[y][x];
     }
+    abort();
 }
 
 //-------------------------------------
 // Checks door state map at player's level and returns what found
 //-------------------------------------
-int G_SetDoorState(int level, int y, int x, doorstate_e state)
+void G_SetDoorState(int level, int y, int x, doorstate_e state)
 {
     switch(level)
     {
@@ -839,6 +841,7 @@ float G_GetDoorPosition(int level, int y, int x)
         case 2:
             return doorpositionsLevel2[y][x];
     }
+    abort();
 }
 
 //-------------------------------------
@@ -857,6 +860,7 @@ int G_GetFromObjectTMap(int level, int y, int x)
         case 2:
             return currentMap.objectTMapLevel2[y][x];
     }
+    abort();
 }
 
 //-------------------------------------
@@ -868,12 +872,15 @@ void G_SetObjectTMap(int level, int y, int x, int value)
     {
         case 0:
             currentMap.objectTMapLevel0[y][x] = value;
+            break;
 
         case 1:
             currentMap.objectTMapLevel1[y][x] = value;
+            break;
 
         case 2:
             currentMap.objectTMapLevel2[y][x] = value;
+            break;
     }
 }
 
@@ -1137,6 +1144,12 @@ void G_PlayerPlayAnimationOnce(objectanimationsID_e animID)
 
     switch(animID)
     {
+        case ANIM_IDLE:
+        case ANIM_DIE:
+        case ANIM_SPECIAL1:
+        case ANIM_SPECIAL2:
+            break;
+
         case ANIM_ATTACK1:
             player.state = PSTATE_ATTACKING1;
             break;
@@ -1163,7 +1176,6 @@ static bool I_PlayerAttack(int attackType)
 
     for(int i = 0; i < ATTACK_CONE_SIZE; i++)
     {
-        bool found;
         ai = G_GetFromDynamicSpriteMap(player.level, player.attackConeGridPos[i].y, player.attackConeGridPos[i].x);
         
         // We found one
@@ -1204,7 +1216,7 @@ static bool I_PlayerAttack(int attackType)
 
     if(ai != NULL && ai->base.dist < PLAYER_AI_HIT_DISTANCE && ai->canBeHit)
     {
-        printf("Hit an enemy.\n");
+        SDL_Log("Hit an enemy.\n");
 
         player.crosshairHit = true;
         player.crosshairTimer->Start(player.crosshairTimer);
@@ -1214,12 +1226,12 @@ static bool I_PlayerAttack(int attackType)
     }
     else
     {
-        printf("Hit the air.\n");
+        SDL_Log("Hit the air.\n");
         return false;
     }
 }
 
-static bool I_PlayerCastSpell(playerSpells_e spell)
+static void I_PlayerCastSpell(playerSpells_e spell)
 {
     float manaNeeded = 9999999.9f;
 
@@ -1338,7 +1350,7 @@ static void I_PlayerLadderMovements()
     if(player.climbingUp)
     {
         // Go UP first
-        if(abs(player.z - player.climbingPosZ) > 1.0f)
+        if(fabsf(player.z - player.climbingPosZ) > 1.0f)
         {
             if(player.climbingPosZ > player.z)
                 player.z += PLAYER_CLIMBING_LADDER_UP_SPEED * deltaTime;
@@ -1350,7 +1362,7 @@ static void I_PlayerLadderMovements()
         else
         {
             // Check the difference between the desired and actual pos
-            if(abs(player.position.x - player.climbingPosX) > 1.0f)
+            if(fabsf(player.position.x - player.climbingPosX) > 1.0f)
             {
                 // Get pos closer to climbing pos
                 if(player.climbingPosX > player.position.x)
@@ -1361,7 +1373,7 @@ static void I_PlayerLadderMovements()
                 doingSomething = true;
             }
 
-            if(abs(player.position.y - player.climbingPosY) > 1.0f)
+            if(fabsf(player.position.y - player.climbingPosY) > 1.0f)
             {
                 if(player.climbingPosY > player.position.y)
                     player.position.y += PLAYER_CLIMBING_LADDER_DOWN_SPEED * deltaTime;
@@ -1375,7 +1387,7 @@ static void I_PlayerLadderMovements()
     {
         // Go X-Y first
         // Check the difference between the desired and actual pos
-        if(abs(player.position.x - player.climbingPosX) > 1.0f)
+        if(fabsf(player.position.x - player.climbingPosX) > 1.0f)
         {
             // Get pos closer to climbing pos
             if(player.climbingPosX > player.position.x)
@@ -1385,7 +1397,7 @@ static void I_PlayerLadderMovements()
 
             doingSomething = true;
         }
-        else if(abs(player.position.y - player.climbingPosY) > 1.0f)
+        else if(fabsf(player.position.y - player.climbingPosY) > 1.0f)
         {
             if(player.climbingPosY > player.position.y)
                 player.position.y += PLAYER_CLIMBING_LADDER_DOWN_SPEED * deltaTime;
@@ -1393,7 +1405,7 @@ static void I_PlayerLadderMovements()
                 player.position.y -= PLAYER_CLIMBING_LADDER_DOWN_SPEED * deltaTime;
             doingSomething = true;
         }
-        else if(abs(player.z - player.climbingPosZ) > 1.0f)
+        else if(fabsf(player.z - player.climbingPosZ) > 1.0f)
         {
             if(player.climbingPosZ > player.z)
                 player.z += PLAYER_CLIMBING_LADDER_DOWN_SPEED * deltaTime;

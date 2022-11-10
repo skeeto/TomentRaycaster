@@ -168,7 +168,7 @@ int G_GetDoorState(int level, int y, int x);
 //-------------------------------------
 // Sets door state map at player's level
 //-------------------------------------
-int G_SetDoorState(int level, int y, int x, doorstate_e state);
+void G_SetDoorState(int level, int y, int x, doorstate_e state);
 
 //-------------------------------------
 // Checks door position map at player's level and returns what found
