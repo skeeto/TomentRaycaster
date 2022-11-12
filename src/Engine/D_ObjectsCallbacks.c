@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <string.h>
 #include "G_Game.h"
 #include "D_ObjectsCallbacks.h"

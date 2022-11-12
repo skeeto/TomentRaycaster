@@ -2,7 +2,6 @@
 #ifndef TIMER_H_INCLUDED
 #define TIMER_H_INCLUDED
 
-#include <stdio.h>
 #include <stdbool.h>
 
 #include "SDL.h"

@@ -1,3 +1,4 @@
+#include <time.h>
 #include "A_Application.h"
 
 #include "R_Rendering.h"

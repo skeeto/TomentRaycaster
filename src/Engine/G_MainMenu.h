@@ -1,8 +1,6 @@
 #ifndef MAIN_MENU_H_INCLUDED
 #define MAIN_MENU_H_INCLUDED
 
-#include <stdbool.h>
-
 #include "SDL.h"
 
 // How off the text the cursor should be

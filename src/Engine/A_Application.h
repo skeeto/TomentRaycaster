@@ -1,10 +1,7 @@
 #ifndef APPLICATION_H_INCLUDED
 #define APPLICATION_H_INCLUDED
 
-#include <stdio.h>
 #include <stdbool.h>
-#include <time.h>
-#include <stdlib.h>
 
 #include "SDL.h"
 

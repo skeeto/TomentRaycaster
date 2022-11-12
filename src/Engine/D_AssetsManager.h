@@ -1,8 +1,6 @@
 #ifndef ASSETS_MANAGER_H_INCLUDED
 #define ASSETS_MANAGER_H_INCLUDED
 
-#include "stdio.h"
-
 #include "SDL.h"
 #include "U_DataTypes.h"
 
@@ -395,7 +393,6 @@ typedef enum imgIDs_e
 
 typedef struct archt_s
 {
-    FILE* file;
     uint32_t fileLength;
     tocElement_t toc[MAX_TOC_LENGTH];
     uint32_t tocSize;

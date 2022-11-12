@@ -1,6 +1,3 @@
-// Standard Libraries
-#include <stdio.h>
-
 // External Libraries
 #include "SDL.h"
 

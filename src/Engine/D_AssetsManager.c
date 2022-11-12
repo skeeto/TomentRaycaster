@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "R_Rendering.h"
 #include "A_Application.h"
 #include "D_AssetsManager.h"
@@ -68,16 +67,14 @@ void D_OpenArchs(void)
     // Open IMG Arch
     //-------------------------------------
     curArch = &tomentdatapack.IMGArch;
-    curArch->file = fopen("Data/img.archt", "rb");
+    SDL_RWops* file = SDL_RWFromFile("Data/img.archt", "r");
 
     // Get file lenght
-    fseek(curArch->file, 0, SEEK_END);
-    curArch->fileLength = ftell(curArch->file);
-    rewind(curArch->file);
+    curArch->fileLength = SDL_RWsize(file);
 
     // Read TOC size in bytes
     // First 4 bytes are TOC length
-    fread(&(curArch->tocSize), sizeof(curArch->tocSize), 1, curArch->file);
+    SDL_RWread(file, &(curArch->tocSize), sizeof(curArch->tocSize), 1);
 
     // Get number of elements
     curArch->tocElementsLenght = curArch->tocSize / sizeof(tocElement_t);
@@ -88,15 +85,16 @@ void D_OpenArchs(void)
     // Fill the ToC
     for(uint32_t i = 0; i < curArch->tocElementsLenght; i++)
     {
-        fread(&curArch->toc[i].id, sizeof(curArch->toc[i].id), 1, curArch->file);
-        fread(&curArch->toc[i].startingOffset, sizeof(curArch->toc[i].startingOffset), 1, curArch->file);
-        fread(&curArch->toc[i].size, sizeof(curArch->toc[i].size), 1, curArch->file);
+        SDL_RWread(file, &curArch->toc[i].id, sizeof(curArch->toc[i].id), 1);
+        SDL_RWread(file, &curArch->toc[i].startingOffset, sizeof(curArch->toc[i].startingOffset), 1);
+        SDL_RWread(file, &curArch->toc[i].size, sizeof(curArch->toc[i].size), 1);
     }
-    rewind(curArch->file);
+    SDL_RWseek(file, 0, RW_SEEK_SET);
 
     // Allocate the buffer to allow reading the file and fill it
     curArch->buffer = (byte *)malloc((curArch->fileLength) * sizeof(byte));
-    fread(tomentdatapack.IMGArch.buffer, (tomentdatapack.IMGArch.fileLength), 1, tomentdatapack.IMGArch.file);
+    SDL_RWread(file, tomentdatapack.IMGArch.buffer, (tomentdatapack.IMGArch.fileLength), 1);
+    SDL_RWclose(file);
 }
 
 
@@ -1542,6 +1540,5 @@ void D_InitLoadPlayersFP(void)
 //-------------------------------------
 void D_CloseArchs(void)
 {
-    fclose(tomentdatapack.IMGArch.file);
     free(tomentdatapack.IMGArch.buffer);
 }

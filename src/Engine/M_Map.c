@@ -1,21 +1,31 @@
+#include <string.h>
 #include "M_Map.h"
 #include "G_Game.h"
 #include "G_AI.h"
 
+// Reads a line at at ime from a buffer
+typedef struct lineReader_s {
+    char* buf;
+    char* end;
+    char* ptr;
+} lineReader_t;
+
 map_t currentMap;
 
-static void I_LoadWallMapFromFile(wallObject_t map[MAP_HEIGHT][MAP_WIDTH], FILE* fp);
-static void I_LoadMapFromFile(int map[MAP_HEIGHT][MAP_WIDTH], FILE* fp);
-static void I_LoadIntFromFile(FILE* fp, int* toLoad);
-static void I_LoadBoolFromFile(FILE* fp, bool* toLoad);
-static void I_LoadFloatFromFile(FILE* fp, float* toLoad);
+static char* I_ReadLine(char *, size_t, lineReader_t *);
+static void I_LoadWallMapFromFile(wallObject_t map[MAP_HEIGHT][MAP_WIDTH], lineReader_t *lr);
+static void I_LoadMapFromFile(int map[MAP_HEIGHT][MAP_WIDTH], lineReader_t* lr);
+static void I_LoadIntFromFile(lineReader_t* lr, int* toLoad);
+static void I_LoadBoolFromFile(lineReader_t* lr, bool* toLoad);
+static void I_LoadFloatFromFile(lineReader_t* lr, float* toLoad);
 
 // -------------------------------
 // Loads the map from the file named mapID
 // -------------------------------
 void M_LoadMapAsCurrent(char* mapID)
 {
-      FILE* fp;
+      SDL_RWops* fp;
+      lineReader_t lr;
       char filepath[MAX_FILEPATH_L] = "Data/maps/";
 
       // Find path
@@ -25,13 +35,16 @@ void M_LoadMapAsCurrent(char* mapID)
       SDL_Log("Loading map... %s\n", filepath);
 
       // Open file
-      fp = fopen(filepath, "r");
-
+      fp = SDL_RWFromFile(filepath, "r");
       if(fp == NULL)
       {
             SDL_Log("Map %s is not present in the Data folder. Aborting. \n", mapID);
             return;
       }
+      size_t size = SDL_RWsize(fp);
+      lr.buf = lr.ptr = calloc(size, 1);
+      lr.end = lr.buf + SDL_RWread(fp, lr.buf, 1, size);
+      SDL_RWclose(fp);
 
       // Load Map
       char curLine[MAX_STRL_R];   // Current line we're reading
@@ -42,7 +55,7 @@ void M_LoadMapAsCurrent(char* mapID)
       // --------------------
       // Read ID
       // --------------------
-      fgets(curLine, MAX_STRL_R, fp);
+      I_ReadLine(curLine, MAX_STRL_R, &lr);
 
       // Find index for reading
       str = strchr(curLine, '=');
@@ -52,7 +65,7 @@ void M_LoadMapAsCurrent(char* mapID)
       i = 0;
       
       // Write
-      while(curLine[indx] != ';' && curLine[indx] != '\n' && curLine[indx] != EOF)
+      while(curLine[indx] != ';' && curLine[indx] != '\n' && curLine[indx] != 0)
       {
             currentMap.id[i] = curLine[indx];
             i++;
@@ -63,7 +76,7 @@ void M_LoadMapAsCurrent(char* mapID)
       // --------------------
       // Read MapName
       // --------------------
-      fgets(curLine, MAX_STRL_R, fp);
+      I_ReadLine(curLine, MAX_STRL_R, &lr);
 
       // Find index for reading
       str = strchr(curLine, '=');
@@ -73,7 +86,7 @@ void M_LoadMapAsCurrent(char* mapID)
       i = 0;
 
       // Write
-      while(curLine[indx] != ';' && curLine[indx] != '\n' && curLine[indx] != EOF)
+      while(curLine[indx] != ';' && curLine[indx] != '\n' && curLine[indx] != 0)
       {
             currentMap.name[i] = curLine[indx];
             i++;
@@ -82,45 +95,45 @@ void M_LoadMapAsCurrent(char* mapID)
       currentMap.name[i] = '\0';
 
       
-      I_LoadIntFromFile(fp, &currentMap.playerStartingLevel);
+      I_LoadIntFromFile(&lr, &currentMap.playerStartingLevel);
 
       // Load Starting player pos
-      I_LoadIntFromFile(fp, &currentMap.playerStartingGridX);
-      I_LoadIntFromFile(fp, &currentMap.playerStartingGridY);
-      I_LoadFloatFromFile(fp, &currentMap.playerStartingRot);
+      I_LoadIntFromFile(&lr, &currentMap.playerStartingGridX);
+      I_LoadIntFromFile(&lr, &currentMap.playerStartingGridY);
+      I_LoadFloatFromFile(&lr, &currentMap.playerStartingRot);
 
       // Load Wall Map
-      I_LoadWallMapFromFile(currentMap.level0, fp);
-      I_LoadWallMapFromFile(currentMap.level1, fp);
-      I_LoadWallMapFromFile(currentMap.level2, fp);
+      I_LoadWallMapFromFile(currentMap.level0, &lr);
+      I_LoadWallMapFromFile(currentMap.level1, &lr);
+      I_LoadWallMapFromFile(currentMap.level2, &lr);
 
       // Load Floor Map
-      I_LoadMapFromFile(currentMap.floorMap, fp);
+      I_LoadMapFromFile(currentMap.floorMap, &lr);
 
       // Load Ceiling Map
-      I_LoadMapFromFile(currentMap.ceilingMap, fp);
+      I_LoadMapFromFile(currentMap.ceilingMap, &lr);
       
       // Load Sprites Map
-      I_LoadMapFromFile(currentMap.spritesMapLevel0, fp);
-      I_LoadMapFromFile(currentMap.spritesMapLevel1, fp);
-      I_LoadMapFromFile(currentMap.spritesMapLevel2, fp);
+      I_LoadMapFromFile(currentMap.spritesMapLevel0, &lr);
+      I_LoadMapFromFile(currentMap.spritesMapLevel1, &lr);
+      I_LoadMapFromFile(currentMap.spritesMapLevel2, &lr);
 
       // Read Wall Lighting
-      I_LoadFloatFromFile(fp, &currentMap.wallLight);
+      I_LoadFloatFromFile(&lr, &currentMap.wallLight);
 
       // Read Ceiling Lighting
-      I_LoadFloatFromFile(fp, &currentMap.floorLight);
+      I_LoadFloatFromFile(&lr, &currentMap.floorLight);
 
       // Read SkyID
-      I_LoadIntFromFile(fp, &currentMap.skyID);
+      I_LoadIntFromFile(&lr, &currentMap.skyID);
 
       // Read hasAbsCeiling
-      I_LoadBoolFromFile(fp, &currentMap.hasAbsCeiling);
+      I_LoadBoolFromFile(&lr, &currentMap.hasAbsCeiling);
 
       // Read absCeilingLevel
-      I_LoadIntFromFile(fp, &currentMap.absCeilingLevel);
+      I_LoadIntFromFile(&lr, &currentMap.absCeilingLevel);
       
-      fclose(fp);
+      free(lr.buf);
 
       // Load the TMap
       M_LoadObjectTMap();
@@ -365,16 +378,35 @@ void M_LoadCollisionMaps(void)
 }
 
 
-static void I_LoadWallMapFromFile(wallObject_t map[MAP_HEIGHT][MAP_WIDTH], FILE* fp)
+static char *I_ReadLine(char *line, size_t length, lineReader_t *lr)
+{
+    SDL_assert(length);
+
+    char *end = memchr(lr->ptr, '\n', lr->end - lr->ptr);
+    if (end) {
+        end++;
+    } else {
+        end = lr->end;
+    }
+
+    size_t lineLength = end - lr->ptr;
+    size_t copyLength = lineLength > length-1 ? length-1 : lineLength;
+    memcpy(line, lr->ptr, copyLength);
+    line[copyLength] = 0;
+    lr->ptr = end;
+    return copyLength ? line : NULL;
+}
+
+static void I_LoadWallMapFromFile(wallObject_t map[MAP_HEIGHT][MAP_WIDTH], lineReader_t *lr)
 {
       // Load Map
       char curLine[MAX_STRL_R];   // Current line we're reading
       char* str;                  // Used to strchr
       int indx;                   // Index of the =
 
-      fgets(curLine, MAX_STRL_R, fp); // Layout =
-      fgets(curLine, MAX_STRL_R, fp); // [ start of map
-      fgets(curLine, MAX_STRL_R, fp); // First Row
+      I_ReadLine(curLine, MAX_STRL_R, lr); // Layout =
+      I_ReadLine(curLine, MAX_STRL_R, lr); // [ start of map
+      I_ReadLine(curLine, MAX_STRL_R, lr); // First Row
 
       // Find the first row
       str = strchr(curLine, '{');
@@ -497,7 +529,7 @@ static void I_LoadWallMapFromFile(wallObject_t map[MAP_HEIGHT][MAP_WIDTH], FILE*
                   column++;
                   indx = 1; // Move at the start of the next column
                   row = 0;
-                  fgets(curLine, MAX_STRL_R, fp); // Get next line
+                  I_ReadLine(curLine, MAX_STRL_R, lr); // Get next line
                   continue;
             }
             else if(curLine[indx + 1] == ']')
@@ -511,16 +543,16 @@ static void I_LoadWallMapFromFile(wallObject_t map[MAP_HEIGHT][MAP_WIDTH], FILE*
       SDL_Log("%s\n", map[0][0].data);
 }
 
-static void I_LoadMapFromFile(int map[MAP_HEIGHT][MAP_WIDTH], FILE* fp)
+static void I_LoadMapFromFile(int map[MAP_HEIGHT][MAP_WIDTH], lineReader_t* lr)
 {
       // Load Map
       char curLine[MAX_STRL_R];   // Current line we're reading
       char* str;                  // Used to strchr
       int indx;                   // Index of the =
 
-      fgets(curLine, MAX_STRLEN, fp); // Layout =
-      fgets(curLine, MAX_STRLEN, fp); // [ start of map
-      fgets(curLine, MAX_STRLEN, fp); // First Row
+      I_ReadLine(curLine, MAX_STRLEN, lr); // Layout =
+      I_ReadLine(curLine, MAX_STRLEN, lr); // [ start of map
+      I_ReadLine(curLine, MAX_STRLEN, lr); // First Row
 
       // Find the first row
       str = strchr(curLine, '{');
@@ -563,7 +595,7 @@ static void I_LoadMapFromFile(int map[MAP_HEIGHT][MAP_WIDTH], FILE* fp)
                   column++;
                   indx = 1; // Move at the start of the next column
                   row = 0;
-                  fgets(curLine, MAX_STRLEN, fp); // Get next line
+                  I_ReadLine(curLine, MAX_STRLEN, lr); // Get next line
                   continue;
             }
             else if(curLine[indx + 1] == ']')
@@ -575,7 +607,7 @@ static void I_LoadMapFromFile(int map[MAP_HEIGHT][MAP_WIDTH], FILE* fp)
       }
 }
 
-static void I_LoadIntFromFile(FILE* fp, int* toLoad)
+static void I_LoadIntFromFile(lineReader_t* lr, int* toLoad)
 {
       // Load Map
       char curLine[MAX_STRL_R];   // Current line we're reading
@@ -586,7 +618,7 @@ static void I_LoadIntFromFile(FILE* fp, int* toLoad)
       // --------------------
       // Read SkyID
       // --------------------
-      fgets(curLine, MAX_STRLEN, fp); // Layout =
+      I_ReadLine(curLine, MAX_STRLEN, lr); // Layout =
 
       // Find index for reading
       str = strchr(curLine, '=');
@@ -597,7 +629,7 @@ static void I_LoadIntFromFile(FILE* fp, int* toLoad)
       
       char tempStr[256];
       // Write
-      while(curLine[indx] != ';' && curLine[indx] != '\n' && curLine[indx] != EOF)
+      while(curLine[indx] != ';' && curLine[indx] != '\n' && curLine[indx] != 0)
       {
             tempStr[i] = curLine[indx];
             i++;
@@ -609,7 +641,7 @@ static void I_LoadIntFromFile(FILE* fp, int* toLoad)
       *toLoad = atoi(tempStr);
 }
 
-static void I_LoadBoolFromFile(FILE* fp, bool* toLoad)
+static void I_LoadBoolFromFile(lineReader_t* lr, bool* toLoad)
 {
       // Load Map
       char curLine[MAX_STRL_R];   // Current line we're reading
@@ -620,7 +652,7 @@ static void I_LoadBoolFromFile(FILE* fp, bool* toLoad)
       // --------------------
       // Read SkyID
       // --------------------
-      fgets(curLine, MAX_STRLEN, fp); // Layout =
+      I_ReadLine(curLine, MAX_STRLEN, lr); // Layout =
 
       // Find index for reading
       str = strchr(curLine, '=');
@@ -631,7 +663,7 @@ static void I_LoadBoolFromFile(FILE* fp, bool* toLoad)
       
       char tempStr[256];
       // Write
-      while(curLine[indx] != ';' && curLine[indx] != '\n' && curLine[indx] != EOF)
+      while(curLine[indx] != ';' && curLine[indx] != '\n' && curLine[indx] != 0)
       {
             tempStr[i] = curLine[indx];
             i++;
@@ -643,7 +675,7 @@ static void I_LoadBoolFromFile(FILE* fp, bool* toLoad)
       *toLoad = atoi(tempStr);
 }
 
-static void I_LoadFloatFromFile(FILE* fp, float* toLoad)
+static void I_LoadFloatFromFile(lineReader_t* lr, float* toLoad)
 {
       // Load Map
       char curLine[MAX_STRL_R];   // Current line we're reading
@@ -654,7 +686,7 @@ static void I_LoadFloatFromFile(FILE* fp, float* toLoad)
       // --------------------
       // Read SkyID
       // --------------------
-      fgets(curLine, MAX_STRLEN, fp); // Layout =
+      I_ReadLine(curLine, MAX_STRLEN, lr); // Layout =
 
       // Find index for reading
       str = strchr(curLine, '=');
@@ -665,7 +697,7 @@ static void I_LoadFloatFromFile(FILE* fp, float* toLoad)
       
       char tempStr[256];
       // Write
-      while(curLine[indx] != ';' && curLine[indx] != '\n' && curLine[indx] != EOF)
+      while(curLine[indx] != ';' && curLine[indx] != '\n' && curLine[indx] != 0)
       {
             tempStr[i] = curLine[indx];
             i++;

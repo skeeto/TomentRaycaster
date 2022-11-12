@@ -1,9 +1,7 @@
 #ifndef MAP_H_INCLUDED
 #define MAP_H_INCLUDED
 
-#include <stdio.h>
 #include <stdbool.h>
-#include <string.h>
 
 #include "A_Application.h"
 #include "D_AssetsManager.h"
