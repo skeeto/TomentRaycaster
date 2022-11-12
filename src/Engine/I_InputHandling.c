@@ -23,6 +23,7 @@ void I_HandleInputGame(void)
                 break;
         }
 
+        U_MixRand(e.common.timestamp);
         G_InGameInputHandlingEvent(&e);
     }
 

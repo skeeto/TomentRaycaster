@@ -396,7 +396,7 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
                 if(cur->state == DS_STATE_ATTACKING)
                 {
                     // Attack chance, casters may fail spell
-                    int attack      =  (rand() % (100)) + 1;
+                    int attack      =  U_Rand(1, 100);
 
                     if(attack <= cur->attributes.attackChance)
                     {
@@ -594,7 +594,7 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                 else
                 {
                     // Do a spell
-                    int spell =  rand() % (2);
+                    int spell =  U_Rand(0, 1);
                     
                     // Hell
                     if(spell == 0)
@@ -1027,7 +1027,7 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                 {
                     // Spawn the spell and go back to idle
                     // Attack chance, casters may fail spell
-                    int attack      =  (rand() % (100)) + 1;
+                    int attack      =  U_Rand(1, 100);
 
                     if(attack <= cur->attributes.attackChance)
                     {

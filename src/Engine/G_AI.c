@@ -222,8 +222,8 @@ void G_AIDie(dynamicSprite_t* cur)
 void G_AIAttackPlayer(dynamicSprite_t* cur)
 {
     // Attack chance
-    int attack      =  (rand() % (100)) + 1;
-    int critical    =  (rand() % (100)) + 1;
+    int attack      =  U_Rand(1, 100);
+    int critical    =  U_Rand(1, 100);
 
     if(attack <= cur->attributes.attackChance)
     {

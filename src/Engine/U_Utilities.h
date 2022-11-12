@@ -9,6 +9,8 @@
 
 void    U_SetBit(byte* b, byte n);
 byte    U_GetBit(byte* b, byte n);
+void    U_MixRand(long long);
+int     U_Rand(int min, int max);
 
 // -------------------------------
 // Perform quicksorts before drawing drawables to draw from farther to nearest

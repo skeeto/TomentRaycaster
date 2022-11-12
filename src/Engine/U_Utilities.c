@@ -1,6 +1,9 @@
 #include <math.h>
 
+#include "SDL.h"
 #include "U_Utilities.h"
+
+static unsigned long long U_RandState;
 
 void U_SetBit(byte* b, byte n)
 {
@@ -12,6 +15,21 @@ byte U_GetBit(byte* b, byte n)
     return (*b >> n) & 1;
 }
 
+
+void U_MixRand(long long x)
+{
+    U_RandState += x;
+    U_RandState *= 1111111111111111111ULL;
+    U_RandState ^= U_RandState >> 33;
+}
+
+int U_Rand(int min, int max)
+{
+    SDL_assert_paranoid(max >= min);
+    int range = max - min + 1;
+    U_RandState = U_RandState*0x3243f6a8885a308d + 1;
+    return (U_RandState >> 32)%range + min;
+}
 
 
 // -------------------------------
